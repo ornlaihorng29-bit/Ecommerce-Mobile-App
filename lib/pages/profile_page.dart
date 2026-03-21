@@ -1,5 +1,6 @@
 // lib/pages/profile_page.dart
 
+import 'package:ecommerce_mobile_app/pages/order_history_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/profile_model.dart';
@@ -282,7 +283,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
         _sectionLabel('Settings'),
         const SizedBox(height: 12),
-        _menuTile(Icons.shopping_bag_outlined, 'My Orders'),
+        _menuTile(Icons.shopping_bag_outlined, 'My Orders', onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const OrderHistoryPage()),
+          );
+        }),
         _menuTile(Icons.favorite_outline_rounded, 'Wishlist'),
         _menuTile(Icons.lock_outline_rounded, 'Change Password'),
         _menuTile(Icons.help_outline_rounded, 'Help & Support'),
@@ -439,25 +445,28 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _menuTile(IconData icon, String label) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      decoration: BoxDecoration(
-          color: _surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _border)),
-      child: Row(children: [
-        Icon(icon, color: Colors.white.withOpacity(0.55), size: 20),
-        const SizedBox(width: 14),
-        Expanded(
-            child: Text(label,
-                style: TextStyle(
-                    color: Colors.white.withOpacity(0.85),
-                    fontSize: 15, fontWeight: FontWeight.w600))),
-        Icon(Icons.chevron_right_rounded,
-            color: Colors.white.withOpacity(0.2), size: 20),
-      ]),
+  Widget _menuTile(IconData icon, String label, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+            color: _surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _border)),
+        child: Row(children: [
+          Icon(icon, color: Colors.white.withOpacity(0.55), size: 20),
+          const SizedBox(width: 14),
+          Expanded(
+              child: Text(label,
+                  style: TextStyle(
+                      color: Colors.white.withOpacity(0.85),
+                      fontSize: 15, fontWeight: FontWeight.w600))),
+          Icon(Icons.chevron_right_rounded,
+              color: Colors.white.withOpacity(0.2), size: 20),
+        ]),
+      ),
     );
   }
 
