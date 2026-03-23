@@ -7,7 +7,7 @@ import '../models/login_model.dart';
 
 class AuthService {
   // ⚠️ On Android emulator use 10.0.2.2 instead of localhost
-  static const String baseUrl = 'http://192.168.1.247:3000/api/auths';
+  static const String baseUrl = 'http://192.168.1.253:3000/api/auths';
 
   Future<LoginResponse> login(String email, String password) async {
     final url = Uri.parse('$baseUrl/logins');

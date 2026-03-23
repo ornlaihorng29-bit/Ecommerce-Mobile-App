@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../models/order_model.dart';
 import '../services/order_service.dart';
+import 'order_history_detail_page.dart';
 
 class OrderHistoryPage extends StatefulWidget {
   const OrderHistoryPage({super.key});
@@ -176,74 +177,90 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
     final statusColor = _statusColor(order.status);
     final paymentColor = _paymentColor(order.paymentStatus);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: _surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _border),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 16,
-              offset: const Offset(0, 6))
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Top row: order code + date
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(children: [
-                Container(
-                  width: 36, height: 36,
-                  decoration: BoxDecoration(
-                      color: _accent.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Icon(Icons.receipt_long_outlined,
-                      color: _accent, size: 18),
-                ),
-                const SizedBox(width: 10),
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('#${order.orderCode}',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 2),
-                  Text(_formatDate(order.createdAt),
-                      style: TextStyle(
-                          color: Colors.white.withOpacity(0.35),
-                          fontSize: 11)),
-                ]),
-              ]),
-              // Order status badge
-              _badge(order.status, statusColor),
-            ],
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => OrderHistoryDetailPage(
+            orderId: order.id,
+            orderCode: order.orderCode,
           ),
+        ),
+      ),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: _surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: _border),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 16,
+                offset: const Offset(0, 6))
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top row: order code + date
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(children: [
+                  Container(
+                    width: 36, height: 36,
+                    decoration: BoxDecoration(
+                        color: _accent.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Icon(Icons.receipt_long_outlined,
+                        color: _accent, size: 18),
+                  ),
+                  const SizedBox(width: 10),
+                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('#${order.orderCode}',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 2),
+                    Text(_formatDate(order.createdAt),
+                        style: TextStyle(
+                            color: Colors.white.withOpacity(0.35),
+                            fontSize: 11)),
+                  ]),
+                ]),
+                // Order status badge + chevron
+                Row(children: [
+                  _badge(order.status, statusColor),
+                  const SizedBox(width: 8),
+                  Icon(Icons.chevron_right_rounded,
+                      color: Colors.white.withOpacity(0.25), size: 18),
+                ]),
+              ],
+            ),
 
-          const SizedBox(height: 14),
-          Divider(color: _border, height: 1),
-          const SizedBox(height: 14),
+            const SizedBox(height: 14),
+            Divider(color: _border, height: 1),
+            const SizedBox(height: 14),
 
-          // Details row
-          Row(children: [
-            Expanded(child: _detailItem('Payment', order.paymentMethod)),
-            Expanded(child: _detailItem('Payment Status',
-                order.paymentStatus, valueColor: paymentColor)),
-          ]),
-          const SizedBox(height: 10),
-          Row(children: [
-            Expanded(child: _detailItem('Promo Code',
-                order.promotionCode.isEmpty ? '—' : order.promotionCode)),
-            Expanded(child: _detailItem('Total',
-                '\$${order.totalAmount.toStringAsFixed(2)}',
-                valueColor: _accent2)),
-          ]),
-        ],
+            // Details row
+            Row(children: [
+              Expanded(child: _detailItem('Payment', order.paymentMethod)),
+              Expanded(child: _detailItem('Payment Status',
+                  order.paymentStatus, valueColor: paymentColor)),
+            ]),
+            const SizedBox(height: 10),
+            Row(children: [
+              Expanded(child: _detailItem('Promo Code',
+                  order.promotionCode.isEmpty ? '—' : order.promotionCode)),
+              Expanded(child: _detailItem('Total',
+                  '\$${order.totalAmount.toStringAsFixed(2)}',
+                  valueColor: _accent2)),
+            ]),
+          ],
+        ),
       ),
     );
   }

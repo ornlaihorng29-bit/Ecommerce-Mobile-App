@@ -21,4 +21,9 @@ class OrderService {
       final meta = OrderMeta.fromJson(response['meta'] as Map<String,dynamic>);
       return OrderListResponse(data: data, meta: meta);
   }
+
+  Future<OrderDetailResponse> historyDetails(int id) async {
+    final response = await ApiService.get('/orders/history-detail/$id');
+    return OrderDetailResponse.fromJson(response);
+  }
 }

@@ -58,6 +58,8 @@ class _AuthGateState extends State<AuthGate> {
 
   Future<void> _checkAuth() async {
     final token = await StorageService.getToken();
+
+
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
