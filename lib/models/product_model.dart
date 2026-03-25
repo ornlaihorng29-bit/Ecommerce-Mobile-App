@@ -133,3 +133,9 @@ class ProductListResponse {
 
   const ProductListResponse({required this.data, required this.meta});
 }
+
+class ProductClientHomeViewResponse {
+  final List<Product> data;
+  const ProductClientHomeViewResponse({required this.data});
+}
+

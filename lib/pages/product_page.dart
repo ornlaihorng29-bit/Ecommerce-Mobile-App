@@ -258,19 +258,39 @@ class _ProductsPageState extends State<ProductsPage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('Products',
-                style: TextStyle(
-                    color: _text,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.6)),
-            if (_meta != null)
-              Text('${_meta!.total} items',
-                  style: TextStyle(
-                      color: Colors.white.withOpacity(0.4), fontSize: 13)),
-          ]),
-          // Filter toggle button
+          Row(                                           // ✅ wrap in Row
+            children: [
+              if (Navigator.canPop(context)) ...[        // ✅ back button
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 40, height: 40,
+                    margin: const EdgeInsets.only(right: 12),
+                    decoration: BoxDecoration(
+                      color: _surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _border),
+                    ),
+                    child: Icon(Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white.withOpacity(0.7), size: 16),
+                  ),
+                ),
+              ],
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Text('Products',
+                    style: TextStyle(
+                        color: _text,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.6)),
+                if (_meta != null)
+                  Text('${_meta!.total} items',
+                      style: TextStyle(
+                          color: Colors.white.withOpacity(0.4), fontSize: 13)),
+              ]),
+            ],
+          ),
+          // Filter toggle button — unchanged
           GestureDetector(
             onTap: () => setState(() => _filterPanelOpen = !_filterPanelOpen),
             child: AnimatedContainer(
@@ -288,9 +308,9 @@ class _ProductsPageState extends State<ProductsPage>
                         : _border),
                 boxShadow: _filterPanelOpen || _hasActiveFilter
                     ? [BoxShadow(
-                        color: _accent.withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4))]
+                    color: _accent.withOpacity(0.4),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4))]
                     : [],
               ),
               child: Stack(alignment: Alignment.center, children: [

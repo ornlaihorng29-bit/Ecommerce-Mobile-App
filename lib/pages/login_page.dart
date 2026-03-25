@@ -68,15 +68,16 @@ class _LoginPageState extends State<LoginPage>
         _passwordController.text,
       );
 
-      // ✅ Save all user data including gender + dob
       await StorageService.saveLoginData(
-        token:  response.accessToken,
-        userId: response.user.id,
-        name:   response.user.name,
-        email:  response.user.email,
-        role:   response.user.role,
-        gender: response.user.gender,
-        dob:    response.user.dob,
+        token:                response.accessToken,
+        refreshToken:         response.refreshToken,          // ✅ new
+        accessTokenExpiresAt: response.accessTokenExpiresAt,  // ✅ new
+        userId:               response.user.id,
+        name:                 response.user.name,
+        email:                response.user.email,
+        role:                 response.user.role,
+        gender:               response.user.gender,
+        dob:                  response.user.dob,
       );
 
       if (!mounted) return;

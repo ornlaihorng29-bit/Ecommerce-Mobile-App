@@ -34,21 +34,27 @@ class LoginResponse {
   final String message;
   final LoginUser user;
   final String accessToken;
+  final String refreshToken;        // ✅ new
+  final int accessTokenExpiresAt;   // ✅ new (Unix timestamp)
 
   const LoginResponse({
     required this.status,
     required this.message,
     required this.user,
     required this.accessToken,
+    required this.refreshToken,
+    required this.accessTokenExpiresAt,
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
     return LoginResponse(
-      status:      json['status'] as String,
-      message:     json['message'] as String,
-      user:        LoginUser.fromJson(
-                     json['data']['user'] as Map<String, dynamic>),
-      accessToken: json['accessToken'] as String,
+      status:               json['status'] as String,
+      message:              json['message'] as String,
+      user:                 LoginUser.fromJson(
+          json['data']['user'] as Map<String, dynamic>),
+      accessToken:          json['accessToken'] as String,
+      refreshToken:         json['refreshToken'] as String,        // ✅
+      accessTokenExpiresAt: json['accessTokenExpiresAt'] as int,   // ✅
     );
   }
 }

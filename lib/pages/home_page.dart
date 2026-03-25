@@ -2,6 +2,7 @@
 
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:ecommerce_mobile_app/pages/cart_page.dart';
+import 'package:ecommerce_mobile_app/pages/category_page.dart';
 import 'package:ecommerce_mobile_app/pages/product_page.dart' show ProductsPage;
 import 'package:ecommerce_mobile_app/pages/profile_page.dart';
 import 'package:flutter/cupertino.dart';
@@ -59,7 +60,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           _buildHomeTab(),
           const CartPage(),
-          // _buildCartTab(),
+          const CategoryPage(),
           const ProductsPage(),
           // Pass reloadKey so ProfilePage knows when to re-fetch
           ProfilePage(
@@ -244,7 +245,7 @@ class _HomePageState extends State<HomePage> {
               ),
 
               const SizedBox(height: 14),
-              Itemswidget(),
+              ItemsWidget(),
               const SizedBox(height: 24),
             ],
           ),
@@ -253,72 +254,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget _buildCartTab() {
-  //   return Stack(
-  //     children: [
-  //       Positioned(top: -80, left: -80, child: _blob(260, _accent, 0.15)),
-  //       SafeArea(
-  //         child: Column(children: [
-  //           Padding(
-  //             padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-  //             child: Row(children: const [
-  //               Text('My Cart',
-  //                   style: TextStyle(
-  //                       color: Colors.white, fontSize: 26,
-  //                       fontWeight: FontWeight.w800, letterSpacing: -0.5)),
-  //             ]),
-  //           ),
-  //           Expanded(
-  //             child: Center(
-  //               child: Column(mainAxisSize: MainAxisSize.min, children: [
-  //                 Container(
-  //                   width: 90, height: 90,
-  //                   decoration: BoxDecoration(
-  //                       color: _surface,
-  //                       borderRadius: BorderRadius.circular(26),
-  //                       border: Border.all(color: _border)),
-  //                   child: Icon(CupertinoIcons.cart,
-  //                       size: 44, color: _accent.withOpacity(0.7)),
-  //                 ),
-  //                 const SizedBox(height: 20),
-  //                 const Text('Your cart is empty',
-  //                     style: TextStyle(
-  //                         color: Colors.white, fontSize: 18,
-  //                         fontWeight: FontWeight.w700)),
-  //                 const SizedBox(height: 8),
-  //                 Text('Add items to get started',
-  //                     style: TextStyle(
-  //                         color: Colors.white.withOpacity(0.35),
-  //                         fontSize: 14)),
-  //                 const SizedBox(height: 28),
-  //                 GestureDetector(
-  //                   onTap: () => setState(() => _currentIndex = 2),
-  //                   child: Container(
-  //                     padding: const EdgeInsets.symmetric(
-  //                         horizontal: 28, vertical: 13),
-  //                     decoration: BoxDecoration(
-  //                       gradient: const LinearGradient(
-  //                           colors: [_accent, _accent2]),
-  //                       borderRadius: BorderRadius.circular(30),
-  //                       boxShadow: [
-  //                         BoxShadow(color: _accent.withOpacity(0.4),
-  //                             blurRadius: 16, offset: const Offset(0, 6))
-  //                       ],
-  //                     ),
-  //                     child: const Text('Browse Products',
-  //                         style: TextStyle(
-  //                             color: Colors.white,
-  //                             fontWeight: FontWeight.w700, fontSize: 15)),
-  //                   ),
-  //                 ),
-  //               ]),
-  //             ),
-  //           ),
-  //         ]),
-  //       ),
-  //     ],
-  //   );
-  // }
+
 
   Widget _blob(double size, Color color, double opacity) => Container(
       width: size, height: size,

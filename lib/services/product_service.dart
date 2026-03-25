@@ -30,9 +30,18 @@ class ProductService {
     return ProductListResponse(data: data, meta: meta);
   }
 
+
   /// GET /products/detail/:id
   Future<ProductDetail> getProductDetail(int id) async {
     final response = await ApiService.get('/products/client-detail/$id');
     return ProductDetail.fromJson(response['data'] as Map<String, dynamic>);
+  }
+
+  Future<ProductClientHomeViewResponse> getProductClientHomeView() async {
+    final response = await ApiService.get('/products/client-product-home-view');
+    final data = (response['data'] as List)
+        .map((item) => Product.fromJson(item as Map<String, dynamic>))
+        .toList();
+    return ProductClientHomeViewResponse(data: data);
   }
 }

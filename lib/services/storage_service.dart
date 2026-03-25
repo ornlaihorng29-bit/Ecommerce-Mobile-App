@@ -3,18 +3,22 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
-  static const _tokenKey  = 'access_token';
-  static const _idKey     = 'user_id';
-  static const _nameKey   = 'user_name';
-  static const _emailKey  = 'user_email';
-  static const _roleKey   = 'user_role';
-  static const _genderKey = 'user_gender';
-  static const _dobKey    = 'user_dob';
+  static const _tokenKey        = 'access_token';
+  static const _refreshTokenKey = 'refresh_token';       // ✅ new
+  static const _expiresAtKey    = 'access_token_expires_at'; // ✅ new
+  static const _idKey           = 'user_id';
+  static const _nameKey         = 'user_name';
+  static const _emailKey        = 'user_email';
+  static const _roleKey         = 'user_role';
+  static const _genderKey       = 'user_gender';
+  static const _dobKey          = 'user_dob';
 
   // ── Save ───────────────────────────────────────────────────────────────────
 
   static Future<void> saveLoginData({
     required String token,
+    required String refreshToken,       // ✅ new
+    required int accessTokenExpiresAt,  // ✅ new (Unix timestamp)
     required int userId,
     required String name,
     required String email,
@@ -24,6 +28,8 @@ class StorageService {
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_tokenKey, token);
+    await prefs.setString(_refreshTokenKey, refreshToken);         // ✅
+    await prefs.setInt(_expiresAtKey, accessTokenExpiresAt);       // ✅
     await prefs.setInt(_idKey, userId);
     await prefs.setString(_nameKey, name);
     await prefs.setString(_emailKey, email);
@@ -32,11 +38,33 @@ class StorageService {
     if (dob != null)    await prefs.setString(_dobKey, dob);
   }
 
+  // ✅ Save only new tokens after refresh (don't overwrite user info)
+  static Future<void> saveTokens({
+    required String accessToken,
+    required String refreshToken,
+    required int accessTokenExpiresAt,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_tokenKey, accessToken);
+    await prefs.setString(_refreshTokenKey, refreshToken);
+    await prefs.setInt(_expiresAtKey, accessTokenExpiresAt);
+  }
+
   // ── Read ───────────────────────────────────────────────────────────────────
 
   static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_tokenKey);
+  }
+
+  static Future<String?> getRefreshToken() async {         // ✅ new
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_refreshTokenKey);
+  }
+
+  static Future<int?> getExpiresAt() async {               // ✅ new
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_expiresAtKey);
   }
 
   static Future<String?> getName() async {
@@ -90,7 +118,15 @@ class StorageService {
     return token != null && token.isNotEmpty;
   }
 
-  // ── Update name locally after profile edit ─────────────────────────────────
+  // ✅ Check if access token is expired (with 60s buffer)
+  static Future<bool> isAccessTokenExpired() async {
+    final expiresAt = await getExpiresAt();
+    if (expiresAt == null) return true;
+    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    return now >= expiresAt - 60; // refresh 60s before actual expiry
+  }
+
+  // ── Update ─────────────────────────────────────────────────────────────────
 
   static Future<void> updateName(String name) async {
     final prefs = await SharedPreferences.getInstance();

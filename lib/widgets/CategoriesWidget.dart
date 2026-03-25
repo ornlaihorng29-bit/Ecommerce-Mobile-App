@@ -4,6 +4,7 @@ import 'package:ecommerce_mobile_app/utils/image_url.dart' show resolveImageUrl;
 import 'package:flutter/material.dart';
 import '../models/category_model.dart';
 import '../services/category_service.dart';
+import '../pages/product_page.dart' show ProductsPage; // ✅ add this import
 
 class CategoriesWidget extends StatefulWidget {
   const CategoriesWidget({super.key});
@@ -33,7 +34,6 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
       future: _future,
       builder: (context, snapshot) {
 
-        // ── Loading skeletons ────────────────────────────────────────────
         if (snapshot.connectionState == ConnectionState.waiting) {
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -44,7 +44,6 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
           );
         }
 
-        // ── Error ────────────────────────────────────────────────────────
         if (snapshot.hasError) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -83,7 +82,6 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
           );
         }
 
-        // ── Data ─────────────────────────────────────────────────────────
         final categories = snapshot.data ?? [];
 
         return SingleChildScrollView(
@@ -91,83 +89,89 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: categories.map((category) {
-              return Container(
-                margin: const EdgeInsets.only(right: 10),
-                padding: const EdgeInsets.symmetric(
-                    vertical: 8, horizontal: 12),
-                decoration: BoxDecoration(
-                  color: _surface,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: _border),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.25),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
+              return GestureDetector(                          // ✅ added
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProductsPage(
+                      initialCategoryId: category.id,         // ✅ pass category
                     ),
-                  ],
+                  ),
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Image container with subtle accent bg
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: _accent.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                            color: _accent.withOpacity(0.15)),
+                child: Container(
+                  margin: const EdgeInsets.only(right: 10),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 8, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: _surface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: _border),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.25),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(11),
-                        child: Image.network(
-                          resolveImageUrl(category.image),
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.contain,
-                          loadingBuilder: (_, child, progress) =>
-                              progress == null
-                                  ? child
-                                  : Center(
-                                      child: SizedBox(
-                                        width: 18,
-                                        height: 18,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: _accent,
-                                          value: progress
-                                                      .expectedTotalBytes !=
-                                                  null
-                                              ? progress
-                                                      .cumulativeBytesLoaded /
-                                                  progress.expectedTotalBytes!
-                                              : null,
-                                        ),
-                                      ),
-                                    ),
-                          errorBuilder: (_, __, ___) => Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 20,
-                            color: _accent.withOpacity(0.5),
+                    ],
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: _accent.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                              color: _accent.withOpacity(0.15)),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(11),
+                          child: Image.network(
+                            resolveImageUrl(category.image),
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.contain,
+                            loadingBuilder: (_, child, progress) =>
+                            progress == null
+                                ? child
+                                : Center(
+                              child: SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: _accent,
+                                  value: progress.expectedTotalBytes != null
+                                      ? progress.cumulativeBytesLoaded /
+                                      progress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              ),
+                            ),
+                            errorBuilder: (_, __, ___) => Icon(
+                              Icons.image_not_supported_outlined,
+                              size: 20,
+                              color: _accent.withOpacity(0.5),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      category.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: Colors.white,
-                        letterSpacing: 0.1,
+                      const SizedBox(width: 10),
+                      Text(
+                        category.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: Colors.white,
+                          letterSpacing: 0.1,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              );
+              );                                               // ✅ close GestureDetector
             }).toList(),
           ),
         );
@@ -176,7 +180,7 @@ class _CategoriesWidgetState extends State<CategoriesWidget> {
   }
 }
 
-// ── Skeleton chip ──────────────────────────────────────────────────────────────
+// ── Skeleton chip — unchanged ──────────────────────────────────────────────────
 
 class _SkeletonChip extends StatefulWidget {
   @override
@@ -214,8 +218,7 @@ class _SkeletonChipState extends State<_SkeletonChip>
           color: Color.lerp(
               const Color(0xFF13131F), const Color(0xFF1E1E2E), _anim.value),
           borderRadius: BorderRadius.circular(20),
-          border:
-              Border.all(color: const Color(0xFF1E1E2E)),
+          border: Border.all(color: const Color(0xFF1E1E2E)),
         ),
         child: Row(
           children: [
