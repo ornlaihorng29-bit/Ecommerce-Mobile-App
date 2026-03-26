@@ -60,8 +60,8 @@ class _HomePageState extends State<HomePage> {
         children: [
           _buildHomeTab(),
           const CartPage(),
-          const CategoryPage(),
           const ProductsPage(),
+          const ProfilePage(),
           // Pass reloadKey so ProfilePage knows when to re-fetch
           ProfilePage(
             key: ValueKey(_profileReload),
@@ -209,7 +209,14 @@ class _HomePageState extends State<HomePage> {
                             fontWeight: FontWeight.w700,
                             letterSpacing: -0.3)),
                     GestureDetector(
-                      onTap: () => setState(() => _currentIndex = 2),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CategoryPage(),
+                          ),
+                        );
+                      },
                       child: Text('See all',
                           style: TextStyle(
                               color: _accent.withOpacity(0.8),

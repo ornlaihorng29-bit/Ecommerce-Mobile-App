@@ -10,12 +10,8 @@ import 'storage_service.dart';
 class ApiService {
   static String get baseUrl {
     if (ApiConfig.overrideUrl != null) return ApiConfig.overrideUrl!;
-    if (kDebugMode) {
-      if (kIsWeb)             return 'http://localhost:3000/api';
-      if (Platform.isAndroid) return 'http://10.0.2.2:3000/api';
-      if (Platform.isIOS)     return 'http://127.0.0.1:3000/api';
-    }
-    return 'http://192.168.1.176:3000/api';
+    // ✅ All platforms use Railway
+    return 'https://ecommerce-app-full-stack-production-d7a8.up.railway.app/api';
   }
 
   // ── JSON headers (Content-Type: application/json) ──────────────────────────

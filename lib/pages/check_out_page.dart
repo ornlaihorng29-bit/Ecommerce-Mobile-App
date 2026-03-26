@@ -1,6 +1,5 @@
 // lib/pages/checkout_page.dart
 
-
 import 'package:ecommerce_mobile_app/models/order_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
@@ -50,46 +49,49 @@ class _CheckoutPageState extends State<CheckoutPage> {
   // ── Place order logic ────────────────────────────────────────────────────
 
   Future<void> _placeOrder(BuildContext context, CartProvider cart) async {
+    if (_isLoading) return;
+
     setState(() => _isLoading = true);
 
     try {
-      // ── Card payment → run Stripe first ─────────────────────────
       if (_paymentMethod == 'card') {
+        // yield to UI thread
+        await Future.microtask(() {});
+
+        // process Stripe payment (async)
         await PaymentService().processPayment(cart.totalPrice);
-        // If we reach here, Stripe payment succeeded
       }
 
-      // ── Send order to your backend ───────────────────────────────
+      // Send order to backend
       final request = OrderRequest(
         paymentMethod: _paymentMethod,
         promotionCode: _promoController.text.trim(),
         orderItems: cart.items
-            .map((i) => OrderItem(
-                  productId: i.productId,
-                  quantity: i.quantity,
-                ))
+            .map((i) => OrderItem(productId: i.productId, quantity: i.quantity))
             .toList(),
       );
 
       await OrderService().placeOrder(request);
 
-      // ── Success → clear cart → go to success page ────────────────
       await cart.clearCart();
 
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
-        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(builder: (_) => const OrderSuccessPage()),
-        (route) => route.isFirst,
+            (route) => route.isFirst,
       );
     } on StripeException catch (e) {
-      // User closed the sheet — silently ignore
+      debugPrint('StripeException caught: ${e.error.code} - ${e.error.message}');
+      debugPrint('StripeException details: ${e.toString()}');
+
       if (e.error.code == FailureCode.Canceled) return;
 
       if (!mounted) return;
-      _showError(context,
-          e.error.localizedMessage ?? 'Payment failed. Please try again.');
+      _showError(
+        context,
+        e.error.localizedMessage ?? 'Payment failed. Please try again.',
+      );
     } catch (e) {
       if (!mounted) return;
       _showError(context, e.toString().replaceFirst('Exception: ', ''));
@@ -97,7 +99,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-
   void _showError(BuildContext context, String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -105,16 +106,20 @@ class _CheckoutPageState extends State<CheckoutPage> {
           const Icon(Icons.error_outline_rounded,
               color: Colors.white, size: 18),
           const SizedBox(width: 8),
-          Expanded(child: Text(msg,
-              style: const TextStyle(fontWeight: FontWeight.w500))),
+          Expanded(
+              child: Text(msg,
+                  style: const TextStyle(fontWeight: FontWeight.w500))),
         ]),
         backgroundColor: Colors.redAccent,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape:
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
       ),
     );
   }
+
+  // ── Build ────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -122,10 +127,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
       backgroundColor: _bg,
       body: Stack(
         children: [
-          Positioned(top: -80, right: -80,
-              child: _blob(260, _accent, 0.12)),
-          Positioned(bottom: -100, left: -80,
-              child: _blob(300, _accent2, 0.07)),
+          Positioned(top: -80, right: -80, child: _blob(260, _accent, 0.12)),
+          Positioned(
+              bottom: -100, left: -80, child: _blob(300, _accent2, 0.07)),
           SafeArea(
             child: Consumer<CartProvider>(
               builder: (context, cart, _) {
@@ -135,7 +139,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     Expanded(
                       child: SingleChildScrollView(
                         padding:
-                            const EdgeInsets.fromLTRB(20, 20, 20, 120),
+                        const EdgeInsets.fromLTRB(20, 20, 20, 120),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -172,8 +176,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
         ),
         const Expanded(
           child: Text('Checkout',
-              style: TextStyle(color: Colors.white,
-                  fontSize: 17, fontWeight: FontWeight.w700)),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700)),
         ),
       ]),
     );
@@ -197,42 +203,43 @@ class _CheckoutPageState extends State<CheckoutPage> {
             children: [
               // Items list
               ...cart.items.map((item) => Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-                    child: Row(children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(item.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600)),
-                            if (item.selectedColor != null) ...[
-                              const SizedBox(height: 2),
-                              Text(item.selectedColor!,
-                                  style: TextStyle(
-                                      color: Colors.white.withOpacity(0.35),
-                                      fontSize: 11)),
-                            ],
-                          ],
-                        ),
-                      ),
-                      Text('× ${item.quantity}',
-                          style: TextStyle(
-                              color: Colors.white.withOpacity(0.4),
-                              fontSize: 12)),
-                      const SizedBox(width: 12),
-                      Text(
-                          '\$${(item.price * item.quantity).toStringAsFixed(2)}',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700)),
-                    ]),
-                  )),
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                child: Row(children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(item.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600)),
+                        if (item.selectedColor != null) ...[
+                          const SizedBox(height: 2),
+                          Text(item.selectedColor!,
+                              style: TextStyle(
+                                  color:
+                                  Colors.white.withOpacity(0.35),
+                                  fontSize: 11)),
+                        ],
+                      ],
+                    ),
+                  ),
+                  Text('× ${item.quantity}',
+                      style: TextStyle(
+                          color: Colors.white.withOpacity(0.4),
+                          fontSize: 12)),
+                  const SizedBox(width: 12),
+                  Text(
+                      '\$${(item.price * item.quantity).toStringAsFixed(2)}',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700)),
+                ]),
+              )),
 
               // Totals
               Padding(
@@ -287,10 +294,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
               ),
               child: Row(children: [
                 Container(
-                  width: 40, height: 40,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
                     gradient: selected
-                        ? const LinearGradient(colors: [_accent, _accent2])
+                        ? const LinearGradient(
+                        colors: [_accent, _accent2])
                         : null,
                     color: selected ? null : _border,
                     borderRadius: BorderRadius.circular(10),
@@ -312,10 +321,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               fontWeight: selected
                                   ? FontWeight.w700
                                   : FontWeight.w400)),
-                      // Stripe badge when card is selected
                       if (selected && option['value'] == 'card') ...[
                         const SizedBox(height: 4),
-                        Text('Powered by Stripe — Visa, Mastercard accepted',
+                        Text(
+                            'Powered by Stripe — Visa, Mastercard accepted',
                             style: TextStyle(
                                 color: Colors.white.withOpacity(0.35),
                                 fontSize: 11)),
@@ -325,7 +334,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
-                  width: 20, height: 20,
+                  width: 20,
+                  height: 20,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
@@ -334,7 +344,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   ),
                   child: selected
                       ? const Icon(Icons.check_rounded,
-                          color: Colors.white, size: 12)
+                      color: Colors.white, size: 12)
                       : null,
                 ),
               ]),
@@ -384,7 +394,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
           Container(
             height: 50,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [_accent, _accent2]),
+              gradient:
+              const LinearGradient(colors: [_accent, _accent2]),
               borderRadius: BorderRadius.circular(14),
             ),
             child: ElevatedButton(
@@ -394,11 +405,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 shadowColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14)),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 20),
               ),
               child: const Text('Apply',
                   style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w700)),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700)),
             ),
           ),
         ]),
@@ -414,10 +427,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
       decoration: BoxDecoration(
         color: _bg,
         border: Border(top: BorderSide(color: _border)),
-        boxShadow: [BoxShadow(
-            color: Colors.black.withOpacity(0.5),
-            blurRadius: 24,
-            offset: const Offset(0, -6))],
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.5),
+              blurRadius: 24,
+              offset: const Offset(0, -6))
+        ],
       ),
       child: Row(children: [
         Column(
@@ -426,7 +441,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
           children: [
             Text('Total',
                 style: TextStyle(
-                    color: Colors.white.withOpacity(0.35), fontSize: 11)),
+                    color: Colors.white.withOpacity(0.35),
+                    fontSize: 11)),
             Text('\$${cart.totalPrice.toStringAsFixed(2)}',
                 style: const TextStyle(
                     color: Colors.white,
@@ -444,14 +460,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 gradient: const LinearGradient(
                     colors: [_accent, Color(0xFF9B5CF6)]),
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(
-                    color: _accent.withOpacity(0.45),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6))],
+                boxShadow: [
+                  BoxShadow(
+                      color: _accent.withOpacity(0.45),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6))
+                ],
               ),
               child: ElevatedButton.icon(
-                onPressed:
-                    _isLoading ? null : () => _placeOrder(context, cart),
+                onPressed: _isLoading
+                    ? null
+                    : () => _placeOrder(context, cart),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,
@@ -460,11 +479,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
                 icon: _isLoading
                     ? const SizedBox(
-                        width: 18, height: 18,
-                        child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2))
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2))
                     : const Icon(Icons.bolt_rounded,
-                        color: Colors.white, size: 20),
+                    color: Colors.white, size: 20),
                 label: Text(
                   _isLoading ? 'Processing...' : 'Place Order',
                   style: const TextStyle(
@@ -501,7 +521,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       : Colors.white.withOpacity(0.45),
                   fontSize: isBold ? 14 : 13,
                   fontWeight:
-                      isBold ? FontWeight.w700 : FontWeight.w400)),
+                  isBold ? FontWeight.w700 : FontWeight.w400)),
           Text(value,
               style: TextStyle(
                   color: valueColor ??
@@ -510,12 +530,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           : Colors.white.withOpacity(0.6)),
                   fontSize: isBold ? 16 : 13,
                   fontWeight:
-                      isBold ? FontWeight.w800 : FontWeight.w500)),
+                  isBold ? FontWeight.w800 : FontWeight.w500)),
         ],
       );
 
   Widget _blob(double size, Color color, double opacity) => Container(
-      width: size, height: size,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: RadialGradient(

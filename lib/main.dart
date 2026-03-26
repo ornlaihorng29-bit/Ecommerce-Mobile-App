@@ -19,7 +19,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   Stripe.publishableKey =
-  'pk_test_51TCwjJEx8106PSkose50zqqdzIpzO7Z4xSBlyWrj2BJGHJPW9E94gEwuqcSru0eJ9MgesvN52ixuuKNUdIQ9b4y800N7asfkaW';
+  'pk_test_51TCzAbJXJG4s4IjxS7xMF9uGi7571yOqlN9Q6oJsk4kZbzsC9yb4yJIu1VXPSuBytOsjS3FjA8XxRhRtB7XuP3zw00VOM5eYWA';
   await Stripe.instance.applySettings();
 
   final cartProvider = CartProvider();
