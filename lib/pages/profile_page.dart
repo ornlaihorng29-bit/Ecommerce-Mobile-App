@@ -1,6 +1,7 @@
 // lib/pages/profile_page.dart
 
 import 'package:ecommerce_mobile_app/pages/order_history_page.dart';
+import 'package:ecommerce_mobile_app/pages/shipping_address_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/profile_model.dart';
@@ -283,6 +284,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
         _sectionLabel('Settings'),
         const SizedBox(height: 12),
+        _menuTile(Icons.location_on_outlined, 'Shipping Address', onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ShippingAddressPage()),
+          );
+        }),
         _menuTile(Icons.shopping_bag_outlined, 'My Orders', onTap: () {
           Navigator.push(
             context,

@@ -114,14 +114,30 @@ class ApiService {
   // ── Response handler ───────────────────────────────────────────────────────
 
   static Map<String, dynamic> _handleResponse(http.Response response) {
-    final data = jsonDecode(response.body);
+    // ✅ Check content type before decoding
+    final contentType = response.headers['content-type'] ?? '';
+    final isJson = contentType.contains('application/json');
+
+    if (!isJson) {
+      throw Exception(
+        'Server error (${response.statusCode}). Please try again later.',
+      );
+    }
+
+    final data = jsonDecode(response.body); // now safe to decode
+
     if (response.statusCode >= 200 && response.statusCode < 300) return data;
+
     if (response.statusCode == 401) {
       throw Exception('Unauthorized. Please login again.');
     }
     if (response.statusCode == 403) {
       throw Exception('Access denied.');
     }
+    if (response.statusCode == 503) {
+      throw Exception('Service temporarily unavailable. Please try again.');
+    }
+
     throw Exception(data['message'] ?? 'Something went wrong.');
   }
 }
